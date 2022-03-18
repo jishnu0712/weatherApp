@@ -1,0 +1,49 @@
+const { on } = require("events");
+const { response } = require("express");
+const express = require("express");
+const https = require("https");
+const bodyParser = require("body-parser");
+
+
+const app = express();
+
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+app.get("/", (req, res) => {
+
+    res.sendFile(__dirname + "/index.html");
+});
+
+
+app.post("/", function (req, res) {
+
+    console.log(req.body.cityName);
+
+    const url = "https://api.openweathermap.org/data/2.5/weather?appid=323eecb3b884f86eae937878ae160d27&q=malda&unit=metric";
+
+    https.get(url, function (response) {
+
+        response.on("data", (data) => {
+            var t = JSON.parse(data);
+            // console.log(t.weather[0].description);
+            const icon = t.weather[0].icon;
+
+            res.write("<h1>weather in Malda is " + t.weather[0].description + "<h1>");
+            res.write("<img src='http://openweathermap.org/img/wn/" + icon + "@2x.png'>");
+            res.send();
+        })
+
+        console.log(response.statusCode);
+    })
+
+
+    console.log("post req received");
+})
+
+
+
+
+app.listen(3000, function () {
+    console.log("server is running.");
+})
